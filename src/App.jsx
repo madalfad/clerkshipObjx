@@ -343,7 +343,7 @@ export default function App() {
 
         {filtering && visibleCount === 0 && (
           <p className="ct-empty">
-            Nothing matches. Clear the search and filters to see the full list.
+            No objectives match the current search and filters.
           </p>
         )}
       </main>

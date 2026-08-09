@@ -26,12 +26,12 @@ const template = {
     {
       num: "01",
       title: "Cross-cutting clinical skills",
-      blurb: "One line on why this section matters.",
+      blurb: "One line describing the scope of the section.",
       groups: [
         {
           title: "Group heading",
           items: [
-            "★ A high-yield objective, written as something you can actually demonstrate",
+            "★ A high-yield objective, stated as an observable action",
             "A second objective",
           ],
         },
