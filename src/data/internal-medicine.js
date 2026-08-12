@@ -203,7 +203,7 @@ const internalMedicine = {
           title: "Shock and critical care",
           items: [
             "★ Distinguish hypovolemic, cardiogenic, distributive and obstructive shock using preload, afterload, cardiac output and mixed venous oxygen saturation",
-            "Apply the current sepsis definitions and initiate the sepsis bundle, including cultures before antibiotics, broad-spectrum antibiotics within the first hour, fluid resuscitation and lactate measurement, and select vasopressor therapy beginning with norepinephrine",
+            "Apply the current SIRS and sepsis definitions, and initiate the sepsis bundle, including cultures before antibiotics, broad-spectrum antibiotics within the first hour, fluid resuscitation and lactate measurement, and select vasopressor therapy beginning with norepinephrine",
             "Define acute respiratory distress syndrome using the Berlin criteria and state the ventilator strategy that reduces mortality: low tidal volume ventilation, plateau pressure limitation and prone positioning in severe disease",
             "Interpret basic ventilator settings and differentiate elevated peak from elevated plateau airway pressures",
             "Identify and manage intensive care unit delirium, applying non-pharmacologic prevention as first-line management",
