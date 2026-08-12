@@ -2,6 +2,14 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 
 import { CLERKSHIPS } from "./data/index.js";
 import { STATUS, buildIndex, hasObjectives, tally } from "./lib/objectives.js";
+import {
+  countStale,
+  exportFilename,
+  mergeProgress,
+  parseImport,
+  summarize,
+  toExport,
+} from "./lib/transfer.js";
 import storage from "./lib/storage.js";
 import "./styles.css";
 
@@ -50,8 +58,11 @@ export default function App() {
   const [loaded, setLoaded] = useState(false);
   const [saveState, setSaveState] = useState("idle");
   const [confirmReset, setConfirmReset] = useState(false);
+  const [transfer, setTransfer] = useState(null);
   const sectionRefs = useRef({});
   const saveTimer = useRef(null);
+  const fileInput = useRef(null);
+  const undoSnapshot = useRef(null);
 
   const clerkship = CLERKSHIPS.find((c) => c.id === clerkshipId) ?? FIRST_READY;
   const { sections, all } = useMemo(() => buildIndex(clerkship), [clerkshipId]);
@@ -131,6 +142,95 @@ export default function App() {
     setStatuses({});
     persist({}, collapsed);
     setConfirmReset(false);
+  };
+
+  const readSaved = async () => {
+    const res = await storage.get(STORAGE_KEY).catch(() => null);
+    if (!res?.value) return { statuses: {}, collapsed: {} };
+    try {
+      return JSON.parse(res.value);
+    } catch {
+      return { statuses: {}, collapsed: {} };
+    }
+  };
+
+  /* Export. The in-memory state for the active rotation is layered over the
+     stored blob so a save still sitting in the debounce is never missed. */
+  const exportProgress = async () => {
+    const saved = await readSaved();
+    const blob = toExport({
+      statuses: { ...(saved.statuses ?? {}), [clerkshipId]: statuses },
+      collapsed: { ...(saved.collapsed ?? {}), [clerkshipId]: collapsed },
+    });
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(blob, null, 2)], { type: "application/json" })
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = exportFilename();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    const { rotations, items } = summarize(blob);
+    setTransfer({
+      tone: "ok",
+      text: `Exported ${items} objectives across ${rotations} ${
+        rotations === 1 ? "rotation" : "rotations"
+      }.`,
+    });
+  };
+
+  const importProgress = async (file) => {
+    const result = parseImport(await file.text());
+    if (!result.ok) {
+      setTransfer({ tone: "error", text: result.error });
+      return;
+    }
+    /* Drop any queued save — it holds pre-import state and would land after. */
+    clearTimeout(saveTimer.current);
+
+    const saved = await readSaved();
+    undoSnapshot.current = saved;
+    const merged = mergeProgress(saved, result.data);
+    const ok = await storage.set(STORAGE_KEY, JSON.stringify(merged));
+
+    setStatuses(merged.statuses?.[clerkshipId] ?? {});
+    setCollapsed(merged.collapsed?.[clerkshipId] ?? {});
+    setSaveState(ok ? "saved" : "error");
+
+    const { rotations, items } = summarize(result.data);
+    const stale = countStale(result.data, clerkshipId, all);
+    const notes = [];
+    if (stale) {
+      notes.push(
+        `${stale} ${stale === 1 ? "does" : "do"} not match the current objective text`
+      );
+    }
+    if (result.data.dropped) {
+      const n = result.data.dropped;
+      notes.push(`${n} unreadable ${n === 1 ? "entry" : "entries"} skipped`);
+    }
+    setTransfer({
+      tone: ok ? "ok" : "error",
+      text: ok
+        ? `Imported ${items} objectives across ${rotations} ${
+            rotations === 1 ? "rotation" : "rotations"
+          }.${notes.length ? ` ${notes.join("; ")}.` : ""}`
+        : "Import could not be saved to this browser.",
+      undo: ok,
+    });
+  };
+
+  const undoImport = async () => {
+    const snapshot = undoSnapshot.current;
+    if (!snapshot) return;
+    const ok = await storage.set(STORAGE_KEY, JSON.stringify(snapshot));
+    setStatuses(snapshot.statuses?.[clerkshipId] ?? {});
+    setCollapsed(snapshot.collapsed?.[clerkshipId] ?? {});
+    setSaveState(ok ? "saved" : "error");
+    undoSnapshot.current = null;
+    setTransfer({ tone: "ok", text: "Import undone. Previous progress restored." });
   };
 
   const overall = tally(all, statuses);
@@ -280,6 +380,23 @@ export default function App() {
           <button className="ct-ghost" onClick={() => setAllCollapsed(false)}>
             Expand all
           </button>
+          <button className="ct-ghost" onClick={exportProgress}>
+            Export
+          </button>
+          <button className="ct-ghost" onClick={() => fileInput.current?.click()}>
+            Import
+          </button>
+          <input
+            ref={fileInput}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) importProgress(file);
+            }}
+          />
           {confirmReset ? (
             <>
               <button className="ct-ghost ct-danger" onClick={resetProgress}>
@@ -296,6 +413,20 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {transfer && (
+        <p className={"ct-transfer " + transfer.tone} role="status">
+          <span>{transfer.text}</span>
+          {transfer.undo && (
+            <button className="ct-ghost" onClick={undoImport}>
+              Undo
+            </button>
+          )}
+          <button className="ct-ghost" onClick={() => setTransfer(null)}>
+            Dismiss
+          </button>
+        </p>
+      )}
 
       {filtering && (
         <p className="ct-filternote">

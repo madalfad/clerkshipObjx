@@ -23,6 +23,7 @@ src/
   styles.css            All styling
   lib/
     objectives.js       hashId, buildIndex, tally, STATUS  (pure, testable)
+    transfer.js         Export/import file format  (pure, testable)
     storage.js          Async storage adapter (localStorage)
   data/
     index.js            Rotation registry — the file you edit to add one
@@ -96,6 +97,39 @@ Each rotation's progress is stored separately, under its `id`.
   ],
 }
 ```
+
+## Moving progress between browsers
+
+Progress lives in the browser's `localStorage`, which is per-browser and
+per-device, and clearing site data wipes it. **Export** writes a JSON file
+covering every rotation; **Import** reads one back.
+
+```json
+{
+  "kind": "clerkship-objective-tracker/progress",
+  "version": 1,
+  "exportedAt": "2026-08-12T19:44:05.546Z",
+  "statuses": { "im": { "bld5rc": 2, "cjko75": 1 } },
+  "collapsed": { "im": { "01": true } }
+}
+```
+
+Status values are the `STATUS` enum: `1` in progress, `2` done. To-do items
+are absent rather than stored as `0`.
+
+Import rules:
+
+- **Merges by rotation.** A rotation named in the file replaces its saved
+  counterpart; a rotation the file says nothing about is left alone, so a
+  partial export cannot wipe the rest.
+- **Unknown rotations are kept**, so progress can be imported before that
+  rotation's objectives are written.
+- **Undo** is offered after every import, and restores the exact prior state.
+- Files that are not exports are rejected by name, with saved progress
+  untouched. Entries with invalid status values are skipped and counted.
+- Because objective IDs are hashed from the objective text, an export taken
+  before wording changed carries IDs that no longer resolve. Those import
+  cleanly but are reported: "3 do not match the current objective text."
 
 ## Things worth knowing
 
