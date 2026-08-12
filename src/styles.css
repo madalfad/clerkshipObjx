@@ -101,6 +101,12 @@ body { margin: 0; background: #F6F7F5; }
 }
 .ct-chip:hover { border-color:var(--ink-3); color:var(--ink); }
 .ct-chip.is-on { background:var(--ink); border-color:var(--ink); color:var(--paper); }
+/* Registered rotation with no objectives yet. */
+.ct-chip:disabled {
+  color:var(--ink-3); background:var(--paper);
+  border-style:dashed; opacity:.5; cursor:not-allowed;
+}
+.ct-chip:disabled:hover { border-color:var(--rule); color:var(--ink-3); }
 .ct-star-chip.is-on { background:var(--active); border-color:var(--active); color:#fff; }
 .ct-tools-right { display:flex; gap:4px; flex-wrap:wrap; margin-left:auto; }
 .ct-ghost {
@@ -176,6 +182,11 @@ body { margin: 0; background: #F6F7F5; }
 .ct-foot {
   display:flex; gap:18px; flex-wrap:wrap; padding-top:16px;
   border-top:1px solid var(--rule); font-family:var(--mono); font-size:11px;
+}
+.ct-placeholder {
+  max-width:980px; margin:0 auto; padding:34px 20px; text-align:center;
+  background:var(--card); border:1px dashed var(--rule); border-radius:3px;
+  font-family:var(--mono); font-size:12px; color:var(--ink-3);
 }
 
 @media (max-width: 640px) {

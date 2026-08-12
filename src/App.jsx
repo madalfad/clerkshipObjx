@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
 import { CLERKSHIPS } from "./data/index.js";
-import { STATUS, buildIndex, tally } from "./lib/objectives.js";
+import { STATUS, buildIndex, hasObjectives, tally } from "./lib/objectives.js";
 import storage from "./lib/storage.js";
 import "./styles.css";
 
@@ -12,8 +12,36 @@ import "./styles.css";
 
 const STORAGE_KEY = "clerkship-tracker:v1";
 
+/** First rotation that actually has objectives; falls back to the first. */
+const FIRST_READY = CLERKSHIPS.find(hasObjectives) ?? CLERKSHIPS[0];
+
+/** Rotation tabs. Registered-but-unwritten rotations render disabled. */
+function RotationTabs({ current, onSelect }) {
+  if (CLERKSHIPS.length < 2) return null;
+  return (
+    <div className="ct-clerkships" role="tablist">
+      {CLERKSHIPS.map((c) => {
+        const ready = hasObjectives(c);
+        return (
+          <button
+            key={c.id}
+            role="tab"
+            aria-selected={c.id === current}
+            disabled={!ready}
+            title={ready ? c.name : `${c.name}: objectives not yet added`}
+            className={"ct-chip" + (c.id === current ? " is-on" : "")}
+            onClick={() => onSelect(c.id)}
+          >
+            {c.short}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function App() {
-  const [clerkshipId, setClerkshipId] = useState(CLERKSHIPS[0].id);
+  const [clerkshipId, setClerkshipId] = useState(FIRST_READY.id);
   const [statuses, setStatuses] = useState({});
   const [collapsed, setCollapsed] = useState({});
   const [query, setQuery] = useState("");
@@ -25,7 +53,7 @@ export default function App() {
   const sectionRefs = useRef({});
   const saveTimer = useRef(null);
 
-  const clerkship = CLERKSHIPS.find((c) => c.id === clerkshipId);
+  const clerkship = CLERKSHIPS.find((c) => c.id === clerkshipId) ?? FIRST_READY;
   const { sections, all } = useMemo(() => buildIndex(clerkship), [clerkshipId]);
 
   /* load once */
@@ -136,6 +164,27 @@ export default function App() {
     );
   };
 
+  /* Registered rotation with nothing written yet. Unreachable by clicking —
+     its tab is disabled — but keeps the app whole if one is selected. */
+  if (!hasObjectives(clerkship)) {
+    return (
+      <div className="ct-root">
+        <header className="ct-head">
+          <div className="ct-head-top">
+            <div>
+              <div className="ct-eyebrow">Clerkship objectives</div>
+              <h1 className="ct-title">{clerkship.name}</h1>
+            </div>
+            <RotationTabs current={clerkshipId} onSelect={setClerkshipId} />
+          </div>
+        </header>
+        <p className="ct-placeholder">
+          Objectives for {clerkship.name} have not been added yet.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="ct-root">
       <header className="ct-head">
@@ -144,21 +193,7 @@ export default function App() {
             <div className="ct-eyebrow">Clerkship objectives</div>
             <h1 className="ct-title">{clerkship.name}</h1>
           </div>
-          {CLERKSHIPS.length > 1 && (
-            <div className="ct-clerkships" role="tablist">
-              {CLERKSHIPS.map((c) => (
-                <button
-                  key={c.id}
-                  role="tab"
-                  aria-selected={c.id === clerkshipId}
-                  className={"ct-chip" + (c.id === clerkshipId ? " is-on" : "")}
-                  onClick={() => setClerkshipId(c.id)}
-                >
-                  {c.short}
-                </button>
-              ))}
-            </div>
-          )}
+          <RotationTabs current={clerkshipId} onSelect={setClerkshipId} />
         </div>
 
         {/* coverage map — one cell per objective, blocked by section */}
