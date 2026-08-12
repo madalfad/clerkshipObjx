@@ -18,7 +18,7 @@ const internalMedicine = {
   sections: [
     {
       num: "01",
-      title: "Cross-cutting clinical skills",
+      title: "Clinical skills",
       blurb: "History taking, physical examination, clinical reasoning, documentation and professionalism.",
       groups: [
         {
@@ -383,7 +383,7 @@ const internalMedicine = {
     },
     {
       num: "07",
-      title: "Cross-cutting decision points",
+      title: "Decision-making",
       blurb: "Diagnostic sequencing, adverse effects and quantitative reasoning that recur across the preceding sections.",
       groups: [
         {
