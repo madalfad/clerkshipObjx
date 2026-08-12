@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 import { CLERKSHIPS } from "./data/index.js";
 import { STATUS, buildIndex, hasObjectives, tally } from "./lib/objectives.js";
@@ -518,6 +519,7 @@ export default function App() {
         <span>Tap an objective to move it: to do → in progress → done.</span>
         <span>Progress saves automatically.</span>
       </footer>
+      <Analytics />
     </div>
   );
 }
