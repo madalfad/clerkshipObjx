@@ -29,11 +29,9 @@ src/
     internal-medicine.js
     surgery.js          Placeholder — empty sections, tab disabled
     pediatrics.js       Placeholder
-    obstetrics.js       Placeholder
-    gynecology.js       Placeholder
+    obgyn.js            Placeholder
     psychiatry.js       Placeholder
     family-medicine.js  Placeholder
-    neurology.js        Placeholder
     _template.js        Copy this to start a rotation not listed above
 ```
 
@@ -116,10 +114,8 @@ Each rotation's progress is stored separately, under its `id`.
 | Internal Medicine | 7 | 27 | 204 | 39 |
 | Surgery | — | — | — | — |
 | Pediatrics | — | — | — | — |
-| Obstetrics | — | — | — | — |
-| Gynecology | — | — | — | — |
+| Obstetrics and Gynecology | — | — | — | — |
 | Psychiatry | — | — | — | — |
 | Family Medicine | — | — | — | — |
-| Neurology | — | — | — | — |
 
 Rotations marked — are registered placeholders with disabled tabs.

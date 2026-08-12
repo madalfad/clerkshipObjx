@@ -18,21 +18,17 @@
 import internalMedicine from "./internal-medicine.js";
 import surgery from "./surgery.js";
 import pediatrics from "./pediatrics.js";
-import obstetrics from "./obstetrics.js";
-import gynecology from "./gynecology.js";
+import obgyn from "./obgyn.js";
 import psychiatry from "./psychiatry.js";
 import familyMedicine from "./family-medicine.js";
-import neurology from "./neurology.js";
 
 export const CLERKSHIPS = [
   internalMedicine,
   surgery,
   pediatrics,
-  obstetrics,
-  gynecology,
+  obgyn,
   psychiatry,
   familyMedicine,
-  neurology,
 ];
 
 export const getClerkship = (id) =>
