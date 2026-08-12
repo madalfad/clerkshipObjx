@@ -10,7 +10,7 @@
  *  Rules:
  *    id      unique, short, lowercase. Progress is saved under this key,
  *            so changing it later orphans saved progress.
- *    short   2–4 characters, shown on the rotation tab.
+ *    short   2–5 characters, shown on the rotation tab.
  *    num     section number as a string ("01", "02", ...). Displayed
  *            verbatim and used as the collapse key.
  *    items   plain strings. Prefix with "★" to mark high-yield.
@@ -26,12 +26,12 @@ const template = {
     {
       num: "01",
       title: "Cross-cutting clinical skills",
-      blurb: "One line on why this section matters.",
+      blurb: "One line describing the scope of the section.",
       groups: [
         {
           title: "Group heading",
           items: [
-            "★ A high-yield objective, written as something you can actually demonstrate",
+            "★ A high-yield objective, stated as an observable action",
             "A second objective",
           ],
         },

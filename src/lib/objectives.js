@@ -13,11 +13,18 @@ export function hashId(str) {
 }
 
 /**
+ * A rotation with no sections is a registered placeholder — its tab shows
+ * but is disabled. Filling in `sections` is all it takes to enable it.
+ */
+export const hasObjectives = (clerkship) =>
+  Array.isArray(clerkship?.sections) && clerkship.sections.length > 0;
+
+/**
  * Expand a clerkship's raw data into indexed sections plus a flat list.
  * Strips the leading "★" and turns it into an `star: true` flag.
  */
 export function buildIndex(clerkship) {
-  const sections = clerkship.sections.map((s) => ({
+  const sections = (clerkship?.sections ?? []).map((s) => ({
     ...s,
     groups: s.groups.map((g) => ({
       ...g,

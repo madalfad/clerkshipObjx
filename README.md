@@ -23,11 +23,17 @@ src/
   styles.css            All styling
   lib/
     objectives.js       hashId, buildIndex, tally, STATUS  (pure, testable)
+    transfer.js         Export/import file format  (pure, testable)
     storage.js          Async storage adapter (localStorage)
   data/
     index.js            Rotation registry — the file you edit to add one
     internal-medicine.js
-    _template.js        Copy this to start a new rotation
+    surgery.js          Placeholder — empty sections, tab disabled
+    pediatrics.js       Placeholder
+    obgyn.js            Placeholder
+    psychiatry.js       Placeholder
+    family-medicine.js  Placeholder
+    _template.js        Copy this to start a rotation not listed above
 ```
 
 The split is the point: **`src/data/` is content, everything else is machinery.**
@@ -36,20 +42,35 @@ specific objective. Progress tracking, search, status filters, the
 high-yield filter, the coverage map and per-section stats all derive from
 whatever is in the data files.
 
-## Adding a rotation
+## Filling in a rotation
 
-1. `cp src/data/_template.js src/data/surgery.js`
+The core rotations are already registered. Each one that has no objectives
+yet ships as a placeholder — an empty `sections` array — and the app renders
+its tab disabled.
+
+To bring one online, open its file and fill in the sections:
+
+```js
+// src/data/surgery.js
+const surgery = {
+  id: "surgery",
+  name: "Surgery",
+  short: "SURG",
+  sections: [ /* ... */ ],   // no longer empty -> tab enables itself
+};
+```
+
+Nothing else changes. Availability is derived from the data, so there is no
+second flag to flip and no way for the tab state to drift from the content.
+
+## Adding a rotation that is not registered
+
+1. `cp src/data/_template.js src/data/dermatology.js`
 2. Fill in `id`, `name`, `short`, and the sections/groups/items.
-3. Register it in `src/data/index.js`:
+3. Import it in `src/data/index.js` and add it to `CLERKSHIPS`. Order there
+   is tab order.
 
-   ```js
-   import surgery from "./surgery.js";
-
-   export const CLERKSHIPS = [internalMedicine, surgery];
-   ```
-
-That's it. A rotation tab appears once there is more than one, and each
-rotation's progress is stored separately.
+Each rotation's progress is stored separately, under its `id`.
 
 ### Data shape
 
@@ -57,7 +78,7 @@ rotation's progress is stored separately.
 {
   id: "surgery",          // unique, lowercase — progress is keyed to this
   name: "Surgery",        // page title
-  short: "SURG",          // tab label, 2–4 characters
+  short: "SURG",          // tab label, 2–5 characters
   sections: [
     {
       num: "01",                        // string, displayed verbatim
@@ -77,6 +98,39 @@ rotation's progress is stored separately.
 }
 ```
 
+## Moving progress between browsers
+
+Progress lives in the browser's `localStorage`, which is per-browser and
+per-device, and clearing site data wipes it. **Export** writes a JSON file
+covering every rotation; **Import** reads one back.
+
+```json
+{
+  "kind": "clerkship-objective-tracker/progress",
+  "version": 1,
+  "exportedAt": "2026-08-12T19:44:05.546Z",
+  "statuses": { "im": { "bld5rc": 2, "cjko75": 1 } },
+  "collapsed": { "im": { "01": true } }
+}
+```
+
+Status values are the `STATUS` enum: `1` in progress, `2` done. To-do items
+are absent rather than stored as `0`.
+
+Import rules:
+
+- **Merges by rotation.** A rotation named in the file replaces its saved
+  counterpart; a rotation the file says nothing about is left alone, so a
+  partial export cannot wipe the rest.
+- **Unknown rotations are kept**, so progress can be imported before that
+  rotation's objectives are written.
+- **Undo** is offered after every import, and restores the exact prior state.
+- Files that are not exports are rejected by name, with saved progress
+  untouched. Entries with invalid status values are skipped and counted.
+- Because objective IDs are hashed from the objective text, an export taken
+  before wording changed carries IDs that no longer resolve. Those import
+  cleanly but are reported: "3 do not match the current objective text."
+
 ## Things worth knowing
 
 - **Objective IDs are hashed from the objective's text**, so rewording an
@@ -92,3 +146,10 @@ rotation's progress is stored separately.
 | Rotation | Sections | Groups | Objectives | High-yield |
 |---|---|---|---|---|
 | Internal Medicine | 7 | 27 | 204 | 39 |
+| Surgery | — | — | — | — |
+| Pediatrics | — | — | — | — |
+| Obstetrics and Gynecology | — | — | — | — |
+| Psychiatry | — | — | — | — |
+| Family Medicine | — | — | — | — |
+
+Rotations marked — are registered placeholders with disabled tabs.

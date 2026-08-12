@@ -101,6 +101,12 @@ body { margin: 0; background: #F6F7F5; }
 }
 .ct-chip:hover { border-color:var(--ink-3); color:var(--ink); }
 .ct-chip.is-on { background:var(--ink); border-color:var(--ink); color:var(--paper); }
+/* Registered rotation with no objectives yet. */
+.ct-chip:disabled {
+  color:var(--ink-3); background:var(--paper);
+  border-style:dashed; opacity:.5; cursor:not-allowed;
+}
+.ct-chip:disabled:hover { border-color:var(--rule); color:var(--ink-3); }
 .ct-star-chip.is-on { background:var(--active); border-color:var(--active); color:#fff; }
 .ct-tools-right { display:flex; gap:4px; flex-wrap:wrap; margin-left:auto; }
 .ct-ghost {
@@ -110,6 +116,15 @@ body { margin: 0; background: #F6F7F5; }
 }
 .ct-ghost:hover { color:var(--ink); background:var(--card); }
 .ct-danger { color:var(--danger); }
+.ct-transfer {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  max-width:980px; margin:10px auto 0; padding:8px 12px;
+  border:1px solid var(--rule); border-radius:2px; background:var(--card);
+  font-family:var(--mono); font-size:11px; color:var(--ink-2);
+}
+.ct-transfer.error { border-color:var(--danger); color:var(--danger); }
+.ct-transfer .ct-ghost { margin-left:auto; padding:2px 6px; }
+.ct-transfer .ct-ghost + .ct-ghost { margin-left:0; }
 .ct-filternote {
   max-width:980px; margin:10px auto 0;
   font-family:var(--mono); font-size:11px; color:var(--ink-3);
@@ -176,6 +191,11 @@ body { margin: 0; background: #F6F7F5; }
 .ct-foot {
   display:flex; gap:18px; flex-wrap:wrap; padding-top:16px;
   border-top:1px solid var(--rule); font-family:var(--mono); font-size:11px;
+}
+.ct-placeholder {
+  max-width:980px; margin:0 auto; padding:34px 20px; text-align:center;
+  background:var(--card); border:1px dashed var(--rule); border-radius:3px;
+  font-family:var(--mono); font-size:12px; color:var(--ink-3);
 }
 
 @media (max-width: 640px) {
