@@ -25,7 +25,7 @@ const template = {
   sections: [
     {
       num: "01",
-      title: "Cross-cutting clinical skills",
+      title: "Clinical skills",
       blurb: "One line describing the scope of the section.",
       groups: [
         {
